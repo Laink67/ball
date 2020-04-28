@@ -1,11 +1,13 @@
 package ru.laink.ball.models
 
 import android.content.res.Resources
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Rect
 import ru.laink.ball.R
 import ru.laink.ball.other.BallDirection
 import ru.laink.ball.views.LabyrinthView
-import java.util.*
 import kotlin.math.abs
 
 class CannonBall(
@@ -28,7 +30,7 @@ class CannonBall(
         return (Rect.intersects(shape, platform.shape))
     }
 
-    private fun intersectPlatform(direction: BallDirection, platforms: LinkedList<Platform>) {
+    private fun intersectPlatform(direction: BallDirection, platforms: ArrayList<Platform>) {
         for (platform in platforms) {
             if (collidesWith(platform)) {
                 when (direction) {
@@ -69,16 +71,16 @@ class CannonBall(
 
     private fun intersectsPlatformLeftBorder(platform: Platform) {
         // Столкновение с левой границей
-        if (abs(shape.right - platform.shape.left) < radius / 2) {
-            shape.right = platform.shape.left - 1
+        if (abs(shape.right - platform.shape.left) <= radius / 2) {
+            shape.right = platform.shape.left
             shape.left = shape.right - radius * 2
         }
     }
 
     private fun intersectsPlatformRightBorder(platform: Platform) {
         // Столкновение с правой границей
-        if (abs(shape.left - platform.shape.right) < radius / 2) {
-            shape.left = platform.shape.right + 1
+        if (abs(shape.left - platform.shape.right) <= radius / 2) {
+            shape.left = platform.shape.right
             shape.right = shape.left + radius * 2
         }
     }
@@ -86,7 +88,7 @@ class CannonBall(
     private fun intersectsPlatformTopBorder(platform: Platform) {
         // Столкновение с верхней границей
         if (abs(shape.bottom - platform.shape.top) < radius / 2) {
-            shape.bottom = platform.shape.top - 1
+            shape.bottom = platform.shape.top
             shape.top = shape.bottom - radius * 2
         }
     }
@@ -94,7 +96,7 @@ class CannonBall(
     private fun intersectsPlatformBottomBorder(platform: Platform) {
         // Столкновение с нижней границей
         if (abs(shape.top - platform.shape.bottom) < radius / 2) {
-            shape.top = platform.shape.bottom + 1
+            shape.top = platform.shape.bottom
             shape.bottom = shape.top + radius * 2
         }
     }
@@ -178,7 +180,7 @@ class CannonBall(
     }
 
     // Изменение вертикальной позиции ядра
-    fun update(xAccel: Float, yAccel: Float, platforms: LinkedList<Platform>) {
+    fun update(xAccel: Float, yAccel: Float, platforms: ArrayList<Platform>) {
         val speedX = velocityX * xAccel
         val speedY = velocityY * yAccel
 
@@ -227,22 +229,38 @@ class CannonBall(
             (velocityX * xAccel * 0.666f / 12).toInt(),
             (velocityY * yAccel * 0.666f / 12).toInt()
         )
+
+        intersectPlatform(direction, platforms)
     }
 
     fun draw(canvas: Canvas, resources: Resources) {
         val ballSrc = BitmapFactory.decodeResource(resources, R.drawable.ball)
         val ball = Bitmap.createScaledBitmap(
-            ballSrc, 100,
-            100, true
+            ballSrc, 2*radius,
+            2*radius, true
         )
 
 //        paint.pathEffect = DiscretePathEffect(60f, 2f)
-//        canvas.drawCircle(
-//            shape.left + getRadius()/* + radius * 10*//*(view.screenWidth / 2).toFloat()*/,
-//            shape.top + getRadius() /*+ getRadius()*//*(view.screenHeight / 2).toFloat()*/,
-//            /*getRadius()*/getRadius(),
-//            paint
-//        )
+
+//        canvas.drawRect(shape, paint)
+/*
+        canvas.drawCircle(
+            (shape.left + radius).toFloat()*/
+/* + radius * 10*//*
+*/
+/*(view.screenWidth / 2).toFloat()*//*
+,
+            (shape.top + radius).toFloat() */
+/*+ getRadius()*//*
+*/
+/*(view.screenHeight / 2).toFloat()*//*
+,
+            */
+/*getRadius()*//*
+radius.toFloat(),
+            paint
+        )
+*/
 
         canvas.drawBitmap(
             ball,

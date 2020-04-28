@@ -1,6 +1,7 @@
 package ru.laink.ball.models
 
 import android.graphics.Canvas
+import android.graphics.Rect
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -18,11 +19,12 @@ open class Circle(
         )
     }
 
-    fun checkIntercept(ball: CannonBall, const:Double): Boolean {
-        return distanceToBall(ball) < radius*const/*1.1*/
+    fun checkIntercept(ball: CannonBall, const: Double): Boolean {
+        return distanceToBall(ball) < radius * const/*1.1*/
+//        return Rect.intersects(ball.shape, shape)
     }
 
-        // Прорисовка  Canvas
+    // Прорисовка  Canvas
     override fun draw(canvas: Canvas) {
         canvas.drawCircle(
             (x + radius + 20).toFloat(),

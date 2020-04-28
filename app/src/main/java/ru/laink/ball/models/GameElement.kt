@@ -8,8 +8,8 @@ open class GameElement(
     color: Int,
     x: Int,
     y: Int,
-    private val width: Int,
-    private val height: Int
+    width: Int,
+    height: Int
 ) {
     val paint = Paint()
     var shape: Rect

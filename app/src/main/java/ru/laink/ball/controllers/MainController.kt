@@ -12,17 +12,20 @@ import android.hardware.SensorManager
 import ru.laink.ball.models.CannonBall
 import ru.laink.ball.models.Let
 import ru.laink.ball.models.Platform
+import ru.laink.ball.other.Constant.Companion.HORIZONTAL_PLATFORM_HEIGHT
+import ru.laink.ball.other.Constant.Companion.MAX_ACCEL
+import ru.laink.ball.other.Constant.Companion.STARTING_VELOCITY
+import ru.laink.ball.other.Constant.Companion.VERTICAL_PLATFORM_WIDTH
 import ru.laink.ball.views.LabyrinthView
+import kotlin.math.abs
+import kotlin.math.sign
 import java.util.*
+import kotlin.collections.ArrayList
 
 class MainController(
     private val context: Context
 ) {
-    // Переменные размеров
-//    var screenWidth: Int = 0
-//    var screenHeight: Int = 0
-
-    lateinit var targets: ArrayList<Target>
+    private var level = 0
 
     // Переменные для игрового цикла и отслеживания игры
     private var timeLeft = 0.0 // Оставшееся время в секунду
@@ -31,8 +34,8 @@ class MainController(
 
     private var xAccel = 0.0f
     private var yAccel = 0.0f
-    private var velocityX = 50f /*xAccel * frameTime*/
-    private var velocityY = 50f /*yAccel * frameTime*/
+    private var velocityX = STARTING_VELOCITY
+    private var velocityY = STARTING_VELOCITY
 
     // Переменные Paint для рисования элементов на экране
     private var textPaint: Paint // Для вывода текста
@@ -45,14 +48,12 @@ class MainController(
 
     lateinit var ball: CannonBall
     lateinit var target: ru.laink.ball.models.Target
-    private lateinit var drawablePlatforms: LinkedList<Platform>
+    private lateinit var drawablePlatforms: ArrayList<Platform>
     private lateinit var lets: ArrayList<Let>
 
     private var rand: Random
 
     init {
-        // Ссылка на MainActivity
-
         // Регистрация слушателя SurfaceHolder.CallBack для получения методов изменения состояния SurfaceView
         view.holder.addCallback(view)
 
@@ -64,23 +65,88 @@ class MainController(
     }
 
 
-    private lateinit var sensorEventListener: SensorEventListener
+    private var sensorEventListener = object : SensorEventListener {
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+        override fun onSensorChanged(event: SensorEvent?) {
+            if (event!!.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                xAccel = event.values[1]
+                yAccel = -event.values[0]
+
+                // Проверка, чтобы сильно не менялась скорость
+                if (abs(xAccel) > MAX_ACCEL)
+                    xAccel = MAX_ACCEL * sign(xAccel)
+
+                // Проверка, чтобы сильно не менялась скорость
+                if (abs(yAccel) > MAX_ACCEL)
+                    yAccel = MAX_ACCEL * sign(yAccel)
+
+                update()
+            }
+        }
+    }
+
 
     fun newGame() {
-        val radius = ((3.0 / 50) * view.getSurfaceHeight()).toInt()
-        val radiusBall = ((3.0 / 60) * view.getSurfaceHeight()).toInt()
+
+        createElementsFirstLvl()
+//        timeLeft = 10.0 // Обратный отсчёт с 10 сек
+//        shotsFired = 0 // Начальное количество выстрелов
+//        totalElapsedTime = 0.0 // Обнулить затраченное время
+    }
+
+
+    private fun generatePlatformsFirstLvl() {
+        drawablePlatforms = arrayListOf(
+            Platform(
+                Color.GRAY,
+                view.screenWidth / 3,
+                0,
+                VERTICAL_PLATFORM_WIDTH,
+                (view.screenHeight * 0.7).toInt()
+            ), Platform(
+                Color.GRAY,
+                view.screenWidth / 2,
+                view.screenHeight / 2,
+                VERTICAL_PLATFORM_WIDTH,
+                view.screenHeight
+            ),
+            Platform(
+                Color.GRAY,
+                (view.screenWidth * 0.7).toInt(),
+                0,
+                VERTICAL_PLATFORM_WIDTH,
+                (view.screenHeight * 0.7).toInt()
+            ), Platform(
+                Color.GRAY,
+                (view.screenWidth * 0.85).toInt(),
+                (view.screenHeight * 0.2).toInt(),
+                (view.screenWidth * 0.5).toInt(),
+                HORIZONTAL_PLATFORM_HEIGHT
+            ),
+            Platform(Color.GRAY,
+                0,
+                (view.screenHeight * 0.2).toInt(),
+                (view.screenWidth*0.2).toInt(),
+                HORIZONTAL_PLATFORM_HEIGHT
+                )
+        )
+    }
+
+    private fun createElementsFirstLvl() {
+        val radius = ((3.0 / 52) * view.getSurfaceHeight()).toInt()
+        val radiusBall = ((3.0 / 55) * view.getSurfaceHeight()).toInt()
 
         // Создание нового ball
         ball = CannonBall(
             view,
-            Color.BLACK,
+            Color.RED,
             view.screenWidth - 100,
             0,
             radiusBall,
             velocityX,
             velocityY
         )
-
 
         target = ru.laink.ball.models.Target(
             view,
@@ -90,79 +156,41 @@ class MainController(
             radius
         )
 
-        drawablePlatforms = LinkedList()
-        generatePlatforms()
+        // Создание платформ
+        generatePlatformsFirstLvl()
 
         lets =
-            arrayListOf(Let(Color.BLACK, view.screenWidth - 200, 400, radius))
-
-//        targets = ArrayList()// Построение нового списка
-//        createEnemies(1.0) // Добавление targets
-//
-//        timeLeft = 10.0 // Обратный отсчёт с 10 сек
-//        shotsFired = 0 // Начальное количество выстрелов
-//        totalElapsedTime = 0.0 // Обнулить затраченное время
-    }
-
-    private fun generatePlatforms() {
-        var platform = Platform(
-            Color.GRAY,
-            view.screenWidth / 3,
-            0,
-            30,
-            /*view.screenHeight / 2*/(view.screenHeight * 0.7).toInt()
-        )
-        this.drawablePlatforms.add(platform)
-
-        platform =
-            Platform(
-                Color.GRAY,
-                view.screenWidth / 2,
-                view.screenHeight / 2,
-                30,
-                view.screenHeight
+            arrayListOf(
+                Let(
+                    Color.BLACK, (view.screenWidth * 0.72).toInt(),
+                    (view.screenHeight * 0.3).toInt(),
+                    radius
+                ),
+                Let(Color.BLACK,
+                    view.screenWidth / 2 - VERTICAL_PLATFORM_WIDTH,
+                    (view.screenHeight * 0.37).toInt(),
+                    radius
+                    ),
+                Let(Color.BLACK,
+                    view.screenWidth / 2 - VERTICAL_PLATFORM_WIDTH,
+                    0,
+                    radius
+                    ),
+                Let(Color.BLACK,
+                    view.screenWidth / 3 - 2*VERTICAL_PLATFORM_WIDTH,
+                    (view.screenHeight * 0.7).toInt(),
+                    radius
+                )
             )
-        this.drawablePlatforms.add(platform)
-
-        platform =
-            Platform(
-                Color.GRAY,
-                (view.screenWidth * 0.7).toInt(),
-                0,
-                30,
-                (view.screenHeight * 0.7).toInt()
-            )
-        this.drawablePlatforms.add(platform)
-
-        platform = Platform(
-            Color.GRAY,
-            (view.screenWidth * 0.85).toInt(),
-            (view.screenHeight * 0.2).toInt(),
-            (view.screenWidth * 0.5).toInt(),
-            30
-        )
-        this.drawablePlatforms.add(platform)
     }
 
     fun registreListener() {
-        sensorEventListener = object : SensorEventListener {
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-
-            override fun onSensorChanged(event: SensorEvent?) {
-                if (event!!.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-                    xAccel = event.values[1]
-                    yAccel = -event.values[0] // don't know why we have to negate the y value...
-                    update()
-                }
-            }
-        }
-
         sensorManager.registerListener(
             sensorEventListener,
             sensorManager.getDefaultSensor(
                 Sensor.TYPE_ACCELEROMETER
             ),
-            SensorManager.SENSOR_DELAY_NORMAL
+            SensorManager.SENSOR_DELAY_GAME
         )
     }
 
@@ -186,30 +214,6 @@ class MainController(
         }
 
         ball.draw(canvas, resources)
-
-//        // Вывод оставшегося времени
-//        canvas.drawText(
-//            resources.getString(R.string.time_remaining_format, timeLeft),
-//            50f,
-//            100f,
-//            textPaint
-//        )
-//
-//        cannon.draw(canvas) // Рисование пушки
-//
-//        // Рисование игровых элементов
-//        if (cannon.cannonBall != null && cannon.cannonBall!!.onScreen)
-//            cannon.cannonBall?.draw(canvas)
-//
-//        // Рисование всех мишеней
-//        for (target in targets) {
-//            target.draw(canvas)
-//            target.drawPolitic(
-//                canvas,
-//                context.resources
-//            )
-//        }
-
     }
 
 
@@ -227,11 +231,6 @@ class MainController(
                 break
             }
         }
-/*
-        if (lets[0].checkIntercept(ball,1.1)) {
-            view.finisTheGame()
-        }
-*/
 
     }
 }
