@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">ball</string>
-    <string name="reset_game">Начать заново</string>
-    <string name="results_format">Ты проиграл</string>
-    <string name="lose">Ты проиграл</string>
+    <string name="app_name">Teeter</string>
+    <string name="reset_game">Далее</string>
+    <string name="results_format">Уровень %1$d</string>
+    <string name="lose">Ты проиграл!</string>
+    <string name="win">Ты выиграл!</string>
+    <string name="play">Играть</string>
+    <string name="exit">Выход</string>
 </resources>

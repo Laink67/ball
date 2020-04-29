@@ -8,7 +8,8 @@ import ru.laink.ball.views.LabyrinthView
 
 class GameOverDialog(
     private val labyrinthView: LabyrinthView,
-    private val messageId: Int
+    private val messageId: Int,
+    private val lvl: Int
 ) : DialogFragment() {
 
     // Объект DialogFragment для вывода статистики и начала новой игры
@@ -16,9 +17,10 @@ class GameOverDialog(
         // Создание диалогового окна c выводом строки messageId\
         val builder = AlertDialog.Builder(activity)
             .setTitle(resources.getString(messageId))
-            // Вывод количество выстрелов и затраченного времени
             .setMessage(
-                R.string.results_format
+                resources.getString(
+                    R.string.results_format, lvl
+                )
             )
 
         builder.setPositiveButton(

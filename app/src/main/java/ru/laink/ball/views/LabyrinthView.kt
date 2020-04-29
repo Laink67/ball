@@ -3,19 +3,17 @@ package ru.laink.ball.views
 import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import android.os.Build
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
-import androidx.core.content.contentValuesOf
 import androidx.fragment.app.FragmentActivity
 import ru.laink.ball.GameOverDialog
 import ru.laink.ball.R
 import ru.laink.ball.controllers.MainController
+
 
 class LabyrinthView(context: Context?, private val controller: MainController) :
     SurfaceView(context),
@@ -28,7 +26,7 @@ class LabyrinthView(context: Context?, private val controller: MainController) :
     var screenHeight: Int = 0
 
     lateinit var gameThread: GameThread // Управляет циклом игры
-    private var gameOver = false
+    var gameOver = false
     var dialogIsDisplayed = false
 
     init {
@@ -96,11 +94,11 @@ class LabyrinthView(context: Context?, private val controller: MainController) :
         }
     }
 
-    fun finisTheGame() {
+    fun finisTheGame(messageId: Int, lvl: Int) {
         controller.unregistreListener()
         gameOver = true
         gameThread.setRunning(false) // Приказывем потоку завершиться
-        showGameOverDialog(R.string.lose) // Сообщение о проигрыше
+        showGameOverDialog(messageId, lvl) // Сообщение о проигрыше
     }
 
     fun stopGame() {
@@ -112,7 +110,7 @@ class LabyrinthView(context: Context?, private val controller: MainController) :
     }
 
     fun drawGameElements(canvas: Canvas) {
-        controller.draw(canvas, resources)
+        controller.draw(canvas)
     }
 
     // Вывод системной панели и панели приложения
@@ -123,9 +121,9 @@ class LabyrinthView(context: Context?, private val controller: MainController) :
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
     }
 
-    private fun showGameOverDialog(messageId: Int) {
+    private fun showGameOverDialog(messageId: Int, lvl: Int) {
         // Объект DialogFragment для вывода статистики и начала новой игры
-        val gameResult = GameOverDialog(this, messageId)
+        val gameResult = GameOverDialog(this, messageId, lvl)
 
         // В UI-потоке FragmentManager используется для вывода DialogFragment
 
@@ -152,21 +150,17 @@ class LabyrinthView(context: Context?, private val controller: MainController) :
         // Управление игровым циклом
         override fun run() {
             var canvas: Canvas? = null // Используется для рисования
-            var previousFrameTime = System.currentTimeMillis()
-            var num: Long = System.currentTimeMillis()
-            var speedIncrease = 1.0
 
             while (threadIsRunning) {
                 try {
                     // Получение Canvas  для монопольного рисования из этого потока
                     canvas = surfaceHolder.lockCanvas(null)
                     screenWidth = canvas.width
+
                     // Блокировка surfaceHolder для рисования
                     synchronized(surfaceHolder) {
                         controller.update()// Обновление состояния игры
-//                        testForCollisions() // Проверка столкновений с GameElement
                         drawGameElements(canvas) // Рисование на объекте canvas
-//                        previousFrameTime = currentTime
                     }
                 } finally {
                     // Вывести содержимое canvas на CannonView  и разрешить использовать canvas другим потокам

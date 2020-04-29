@@ -12,7 +12,7 @@ open class Circle(
     private val radius: Int
 ) : GameElement(color, x, y, 2 * radius, 2 * radius) {
 
-    fun distanceToBall(ball: CannonBall): Double {
+    private fun distanceToBall(ball: CannonBall): Double {
         return sqrt(
             (ball.shape.centerX() - shape.centerX()).toDouble().pow(2.0) +
                     (ball.shape.centerY() - shape.centerY()).toDouble().pow(2.0)

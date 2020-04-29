@@ -11,7 +11,7 @@ open class GameElement(
     width: Int,
     height: Int
 ) {
-    val paint = Paint()
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     var shape: Rect
 
     init {

@@ -1,10 +1,7 @@
 package ru.laink.ball.models
 
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Rect
+import android.graphics.*
 import ru.laink.ball.R
 import ru.laink.ball.other.BallDirection
 import ru.laink.ball.views.LabyrinthView
@@ -236,31 +233,9 @@ class CannonBall(
     fun draw(canvas: Canvas, resources: Resources) {
         val ballSrc = BitmapFactory.decodeResource(resources, R.drawable.ball)
         val ball = Bitmap.createScaledBitmap(
-            ballSrc, 2*radius,
-            2*radius, true
+            ballSrc, 2 * radius,
+            2 * radius, true
         )
-
-//        paint.pathEffect = DiscretePathEffect(60f, 2f)
-
-//        canvas.drawRect(shape, paint)
-/*
-        canvas.drawCircle(
-            (shape.left + radius).toFloat()*/
-/* + radius * 10*//*
-*/
-/*(view.screenWidth / 2).toFloat()*//*
-,
-            (shape.top + radius).toFloat() */
-/*+ getRadius()*//*
-*/
-/*(view.screenHeight / 2).toFloat()*//*
-,
-            */
-/*getRadius()*//*
-radius.toFloat(),
-            paint
-        )
-*/
 
         canvas.drawBitmap(
             ball,
