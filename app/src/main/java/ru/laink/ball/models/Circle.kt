@@ -21,7 +21,6 @@ open class Circle(
 
     fun checkIntercept(ball: CannonBall, const: Double): Boolean {
         return distanceToBall(ball) < radius * const/*1.1*/
-//        return Rect.intersects(ball.shape, shape)
     }
 
     // Прорисовка  Canvas

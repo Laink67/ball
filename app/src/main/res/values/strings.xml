@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Teeter</string>
+    <string name="app_name">SKOLKOVO</string>
     <string name="reset_game">Далее</string>
     <string name="results_format">Уровень %1$d</string>
     <string name="lose">Ты проиграл!</string>
